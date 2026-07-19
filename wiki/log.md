@@ -130,3 +130,8 @@ Allowed operations:
 - Added the public study-site URL to the README and excluded the accidental nested `Untitled/` repository from version control.
 - Raw source documents remain local because `raw/` is gitignored.
 - Files touched: `.github/workflows/pages.yml`, `.gitignore`, `README.md`, `wiki/log.md`.
+
+## [2026-07-19] meta | Add downloadable lecture tracker spreadsheet
+- Created an Excel tracker listing all 93 BRS Study Hub lectures across 11 topics, with Yes/No columns for notes made, 1st/2nd round Anki, and practice questions.
+- Inserted blank spacer rows between topic blocks and added a homepage download button for the file.
+- Files touched: `site/downloads/brs-lecture-tracker.xlsx`, `site/index.html`, `site/css/styles.css`, `wiki/log.md`.

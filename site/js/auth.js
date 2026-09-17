@@ -4,11 +4,8 @@
 (function () {
   "use strict";
 
-  var STORE_KEY = "brs-access";
-  var TTL_MS = 30 * 24 * 60 * 60 * 1000;
   var USER_HASH = "ccd4e04a";
   var PASS_HASH = "5569c1a5";
-  var TOKEN = "e40372f2";
   var SALT = "brs1b::";
 
   function hash(value) {
@@ -19,44 +16,19 @@
     return h.toString(16);
   }
 
-  function store() {
-    try {
-      var probe = "__brs";
-      window.localStorage.setItem(probe, probe);
-      window.localStorage.removeItem(probe);
-      return window.localStorage;
-    } catch (err) {
-      return null;
-    }
+  /* Nothing is remembered between page loads: every load, refresh, and
+     navigation asks for the credentials again. */
+  try {
+    window.localStorage.removeItem("brs-access");
+  } catch (err) {
+    /* storage blocked — nothing to clean up */
   }
 
-  function unlocked() {
-    var s = store();
-    if (!s) return false;
-    try {
-      var saved = JSON.parse(s.getItem(STORE_KEY));
-      if (!saved || saved.k !== TOKEN) return false;
-      if (!saved.exp || saved.exp < Date.now()) {
-        s.removeItem(STORE_KEY);
-        return false;
-      }
-      return true;
-    } catch (err) {
-      return false;
-    }
-  }
-
-  function remember() {
-    var s = store();
-    if (!s) return;
-    try {
-      s.setItem(STORE_KEY, JSON.stringify({ k: TOKEN, exp: Date.now() + TTL_MS }));
-    } catch (err) {
-      /* private browsing / quota — gate re-appears next page load */
-    }
-  }
-
-  if (unlocked()) return;
+  /* A page restored from the back/forward cache does not re-run scripts, so it
+     would come back already unlocked. Force a real load instead. */
+  window.addEventListener("pageshow", function (event) {
+    if (event.persisted) window.location.reload();
+  });
 
   var root = document.documentElement;
   root.className += " brs-locked";
@@ -116,7 +88,6 @@
       var okUser = hash(SALT + user.value.trim().toLowerCase()) === USER_HASH;
       var okPass = hash(SALT + pass.value) === PASS_HASH;
       if (okUser && okPass) {
-        remember();
         root.className = root.className.replace(/\s*brs-locked/, "");
         gate.parentNode.removeChild(gate);
         return;
